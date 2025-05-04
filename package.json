@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://BujiRensO.github.io/it35-lab/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -14,11 +15,13 @@
   "dependencies": {
     "@ionic/react": "^8.5.0",
     "@ionic/react-router": "^8.5.0",
+    "@supabase/supabase-js": "^2.49.4",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "bcryptjs": "^3.0.2",
     "ionicons": "^7.4.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4"
   },
