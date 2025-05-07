@@ -1,10 +1,7 @@
 // src/pages/Home.tsx
 import { 
   IonContent, 
-  IonHeader, 
   IonPage, 
-  IonTitle, 
-  IonToolbar,
   IonInput,
   IonButton,
   IonCard,
@@ -74,11 +71,6 @@ const Home: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Login</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent className="ion-padding" fullscreen>
         <div style={{
           maxWidth: 370,
