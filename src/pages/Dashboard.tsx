@@ -373,9 +373,6 @@ const Dashboard: React.FC = () => {
                 <h2>{profile?.full_name || 'User'}</h2>
               </IonLabel>
             </IonItem>
-            <IonItem button onClick={() => {/* open edit profile modal or page */}}>
-              <IonLabel>Edit Profile</IonLabel>
-            </IonItem>
             <IonItem button onClick={async () => {
               await supabase.auth.signOut();
               routerHistory.push('/home');
