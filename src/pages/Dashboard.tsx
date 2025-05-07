@@ -81,7 +81,14 @@ const Dashboard: React.FC = () => {
   const fetchItems = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('items').select('*');
-    if (!error) setItems(data || []);
+    if (!error) {
+      const patched = (data || []).map(item =>
+        item.name === 'Dell XPS 15'
+          ? { ...item, image_url: 'https://qeuignqfwdwvejqndojs.supabase.co/storage/v1/object/public/avatars//Dell%20XPS%2015.jpg' }
+          : item
+      );
+      setItems(patched);
+    }
     setLoading(false);
   };
 
@@ -102,7 +109,12 @@ const Dashboard: React.FC = () => {
       .select('*, items(name, image_url)')
       .eq('user_id', user.id)
       .order('borrowed_at', { ascending: false });
-    setHistory(data || []);
+    const patched = (data || []).map(entry =>
+      entry.items?.name === 'Dell XPS 15'
+        ? { ...entry, items: { ...entry.items, image_url: 'https://qeuignqfwdwvejqndojs.supabase.co/storage/v1/object/public/avatars//Dell%20XPS%2015.jpg' } }
+        : entry
+    );
+    setHistory(patched);
     setHistoryLoading(false);
   };
 
@@ -121,7 +133,12 @@ const Dashboard: React.FC = () => {
       .is('returned_at', null)
       .eq('status', 'Active')
       .order('borrowed_at', { ascending: false });
-    setMyBorrowings(data || []);
+    const patched = (data || []).map(entry =>
+      entry.items?.name === 'Dell XPS 15'
+        ? { ...entry, items: { ...entry.items, image_url: 'https://qeuignqfwdwvejqndojs.supabase.co/storage/v1/object/public/avatars//Dell%20XPS%2015.jpg' } }
+        : entry
+    );
+    setMyBorrowings(patched);
     setMyBorrowingsLoading(false);
   };
 
@@ -138,7 +155,18 @@ const Dashboard: React.FC = () => {
       .update({ status: 'Available' })
       .eq('id', itemId);
 
-    // 3. Refresh lists
+    // 3. Update borrow_history for this user, item, and where returned_at is null
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('borrow_history')
+        .update({ returned_at: new Date().toISOString(), status: 'Returned' })
+        .eq('user_id', user.id)
+        .eq('item_id', itemId)
+        .is('returned_at', null);
+    }
+
+    // 4. Refresh lists
     fetchMyBorrowings();
     fetchHistory();
     fetchItems();
@@ -190,6 +218,16 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchMyBorrowings();
   }, []);
+
+  const handleClearHistory = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase
+      .from('borrow_history')
+      .delete()
+      .eq('user_id', user.id);
+    fetchHistory();
+  };
 
   return (
     <IonPage>
@@ -368,6 +406,14 @@ const Dashboard: React.FC = () => {
             </IonToolbar>
           </IonHeader>
           <IonContent className="ion-padding">
+            <IonButton
+              color="danger"
+              expand="block"
+              onClick={handleClearHistory}
+              disabled={history.length === 0}
+            >
+              Clear History
+            </IonButton>
             {historyLoading ? (
               <div>Loading...</div>
             ) : (
