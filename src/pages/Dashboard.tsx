@@ -20,7 +20,7 @@ import {
   IonSearchbar,
   IonModal
 } from '@ionic/react';
-import { hardwareChipOutline, timeOutline } from 'ionicons/icons';
+import { timeOutline } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
 import { supabase } from '../utils/SupabaseClient';
 
@@ -74,6 +74,8 @@ const Dashboard: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [myBorrowings, setMyBorrowings] = useState<BorrowedItem[]>([]);
   const [myBorrowingsLoading, setMyBorrowingsLoading] = useState(false);
+  const [category, setCategory] = useState<string>('All');
+  const [search, setSearch] = useState<string>('');
 
   // Fetch items from the database
   const fetchItems = async () => {
@@ -201,7 +203,11 @@ const Dashboard: React.FC = () => {
           {/* Search Section */}
           <IonRow>
             <IonCol>
-              <IonSearchbar placeholder="Search devices..." />
+              <IonSearchbar
+                placeholder="Search devices..."
+                value={search}
+                onIonInput={e => setSearch(e.detail.value!)}
+              />
             </IonCol>
           </IonRow>
 
@@ -209,9 +215,12 @@ const Dashboard: React.FC = () => {
           <IonRow>
             <IonCol>
               <div className="category-buttons">
-                <IonButton fill="outline">Tablets</IonButton>
-                <IonButton fill="outline">Monitors</IonButton>
-                <IonButton fill="outline">Accessories</IonButton>
+                <IonButton fill={category === 'All' ? 'solid' : 'outline'} onClick={() => setCategory('All')}>All</IonButton>
+                <IonButton fill={category === 'Tablets' ? 'solid' : 'outline'} onClick={() => setCategory('Tablets')}>Tablets</IonButton>
+                <IonButton fill={category === 'Monitors' ? 'solid' : 'outline'} onClick={() => setCategory('Monitors')}>Monitors</IonButton>
+                <IonButton fill={category === 'Accessories' ? 'solid' : 'outline'} onClick={() => setCategory('Accessories')}>Accessories</IonButton>
+                <IonButton fill={category === 'Networking' ? 'solid' : 'outline'} onClick={() => setCategory('Networking')}>Networking</IonButton>
+                <IonButton fill={category === 'IT Equipment' ? 'solid' : 'outline'} onClick={() => setCategory('IT Equipment')}>IT Equipment</IonButton>
               </div>
             </IonCol>
           </IonRow>
@@ -228,24 +237,31 @@ const Dashboard: React.FC = () => {
                     <div>Loading...</div>
                   ) : (
                     <IonList>
-                      {items.map((item) => (
-                        <IonItem key={item.id}>
-                          <IonLabel>
-                            <h2>{item.name}</h2>
-                            <p>{item.specs}</p>
-                          </IonLabel>
-                          <IonButton
-                            slot="end"
-                            fill="outline"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setShowModal(true);
-                            }}
-                          >
-                            View Details
-                          </IonButton>
-                        </IonItem>
-                      ))}
+                      {items
+                        .filter(item =>
+                          (category === 'All' || item.category === category) &&
+                          (item.name.toLowerCase().includes(search.toLowerCase()) ||
+                            (item.specs && item.specs.toLowerCase().includes(search.toLowerCase()))
+                          )
+                        )
+                        .map((item) => (
+                          <IonItem key={item.id}>
+                            <IonLabel>
+                              <h2>{item.name}</h2>
+                              <p>{item.specs}</p>
+                            </IonLabel>
+                            <IonButton
+                              slot="end"
+                              fill="outline"
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setShowModal(true);
+                              }}
+                            >
+                              View Details
+                            </IonButton>
+                          </IonItem>
+                        ))}
                     </IonList>
                   )}
                 </IonCardContent>
@@ -293,13 +309,6 @@ const Dashboard: React.FC = () => {
 
           {/* Quick Actions */}
           <IonRow>
-            <IonCol size="4">
-              <IonButton expand="block" fill="clear">
-                <IonIcon icon={hardwareChipOutline} />
-                <br />
-                Active
-              </IonButton>
-            </IonCol>
             <IonCol size="4">
               <IonButton expand="block" fill="clear" onClick={() => { setShowHistory(true); fetchHistory(); }}>
                 <IonIcon icon={timeOutline} />
